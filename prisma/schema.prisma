@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -20,27 +20,43 @@ model Admin {
   updateAt          DateTime          @updatedAt
 
 
-  //  RELATION
+  //  FOREIGN KEY
   notes             Note[]
 }
-
-
 
 
 model Note {
   id                Int               @id @default(autoincrement())
   title             String
   body              String
+  description       String
+  admin_id          Int
   createdAt         DateTime          @default(now())
   updateAt          DateTime          @updatedAt
   
   //    RELATION
-  admin_id          Int
   admin             Admin             @relation(fields: [admin_id], references: [id])
+
+  //  FOREIGN KEY
+  contentUpload     contentUpload[]
+}
+
+
+model contentUpload {
+  id                Int               @id @default(autoincrement())
+  filename          String
+  location          String
+  note_id           Int
+  createdAt         DateTime          @default(now())
+  updateAt          DateTime          @updatedAt
+
+  //    RELATION
+  note              Note?             @relation(fields: [note_id], references: [id])
+
 }
 
 
 enum Role {
-  Admin
-  Super_admin
+  admin
+  super_admin
 }

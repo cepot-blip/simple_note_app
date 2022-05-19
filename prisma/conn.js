@@ -1,5 +1,5 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@prisma/client"
 
-const conn = new PrismaClient();
+const conn = new PrismaClient()
 
-export default conn;
+export default conn
