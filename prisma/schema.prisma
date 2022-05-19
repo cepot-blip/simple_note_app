@@ -35,7 +35,7 @@ model Note {
   updateAt          DateTime          @updatedAt
   
   //    RELATION
-  admin             Admin             @relation(fields: [admin_id], references: [id])
+  admin             Admin             @relation(fields: [admin_id], references: [id], onDelete: Cascade)
 
   //  FOREIGN KEY
   contentUpload     contentUpload[]
@@ -51,7 +51,7 @@ model contentUpload {
   updateAt          DateTime          @updatedAt
 
   //    RELATION
-  note              Note?             @relation(fields: [note_id], references: [id])
+  note              Note?             @relation(fields: [note_id], references: [id], onDelete: Cascade)
 
 }
 

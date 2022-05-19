@@ -10,7 +10,7 @@ import helmet from "helmet"
 import admin_routes from "./routes/admin_routes"
 import note_routes from "./routes/note_routes"
 
-//	RATE LIMIT, the process of limiting the number of user/client requests on certain resources
+//	RATE LIMIT, THE PROCESS OF LIMITING THE NUMBER OF USER/CLIENT REQUSET ON CERTAIN RESOURCES
 const limiter = rateLimit({
 	windowMs: 15 * 1000, //15 minute
 	max: 100,

@@ -12,7 +12,7 @@ env.config()
 const note_routes = express.Router()
 
 //      CREATE NOTE
-note_routes.post("/note/create", content_upload.single("content"), authCheck, super_admin_check, async (req, res) => {
+note_routes.post("/note/create", content_upload.single("content"), authCheck, async (req, res) => {
 	try {
 		const data = await req.body
 		const file = await req.file
@@ -86,7 +86,7 @@ note_routes.post("/note/read", async (req, res) => {
 })
 
 //      UPDATE NOTE
-note_routes.put("/note/update", content_upload.single("content"), authCheck, super_admin_check, async (req, res) => {
+note_routes.put("/note/update", content_upload.single("content"), authCheck, async (req, res) => {
 	try {
 		const data = await req.body
 		const file = await req.file
@@ -152,7 +152,7 @@ note_routes.put("/note/update", content_upload.single("content"), authCheck, sup
 })
 
 //      DELETE NOTE
-note_routes.delete("/note/delete", content_upload.single("content"), authCheck, super_admin_check, async (req, res) => {
+note_routes.delete("/note/delete", content_upload.single("content"), authCheck, async (req, res) => {
 	try {
 		const data = await req.body
 		const file = await req.file

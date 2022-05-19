@@ -151,9 +151,12 @@ admin_routes.put("/admin/update", authCheck, async (req, res) => {
 		const data = await req.body
 		const result = await conn.admin.update({
 			where: {
-				id: parseInt(req.params.id),
+				id: parseInt(data.id),
 			},
-			data: data,
+			data: {
+				email: data.email,
+				password: data.password,
+			},
 		})
 
 		res.status(201).json({
@@ -169,7 +172,7 @@ admin_routes.put("/admin/update", authCheck, async (req, res) => {
 })
 
 //    DELETE ADMIN
-admin_routes.delete("/admin/delete", authCheck, super_admin_check, async (req, res) => {
+admin_routes.delete("/admin/delete", authCheck, async (req, res) => {
 	try {
 		const { id } = await req.body
 		const result = await conn.admin.delete({
