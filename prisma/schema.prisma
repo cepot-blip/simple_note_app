@@ -52,7 +52,6 @@ model contentUpload {
 
   //    RELATION
   note              Note?             @relation(fields: [note_id], references: [id], onDelete: Cascade)
-
 }
 
 

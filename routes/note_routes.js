@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken"
 import env from "dotenv"
 import path from "path"
 import fs from "fs"
+import { rateLimit } from "express-rate-limit"
 import conn from "../prisma/conn"
 import content_upload from "../libs/upload_services"
 import { authCheck } from "../middleware/auth"
@@ -11,37 +12,52 @@ env.config()
 
 const note_routes = express.Router()
 
+const limitNote = rateLimit({
+	windowMs: 15 * 60 * 1000, //15 minutes
+	max: 20,
+	standardHeaders: true,
+	legacyHeaders: false,
+	message: "Pressing the screen too much, please wait a little longer up to 15 minutes !!",
+})
+
 //      CREATE NOTE
-note_routes.post("/note/create", content_upload.single("content"), authCheck, async (req, res) => {
-	try {
-		const data = await req.body
-		const file = await req.file
-		const store = await conn.note.create({
-			data: {
-				title: data.title,
-				body: data.body,
-				description: data.description,
-				admin_id: parseInt(data.admin_id),
-				contentUpload: {
-					create: {
-						filename: file.filename,
-						location: `/public/uploads/content/${file.filename}`,
+note_routes.post(
+	"/note/create",
+	content_upload.single("content"),
+	limitNote,
+	authCheck,
+	super_admin_check,
+	async (req, res) => {
+		try {
+			const data = await req.body
+			const file = await req.file
+			const store = await conn.note.create({
+				data: {
+					title: data.title,
+					body: data.body,
+					description: data.description,
+					admin_id: parseInt(data.admin_id),
+					contentUpload: {
+						create: {
+							filename: file.filename,
+							location: `/public/uploads/content/${file.filename}`,
+						},
 					},
 				},
-			},
-		})
+			})
 
-		res.status(201).json({
-			success: true,
-			query: store,
-		})
-	} catch (error) {
-		res.status(500).json({
-			success: false,
-			error: error.message,
-		})
+			res.status(201).json({
+				success: true,
+				query: store,
+			})
+		} catch (error) {
+			res.status(500).json({
+				success: false,
+				error: error.message,
+			})
+		}
 	}
-})
+)
 
 //      READ ALL NOTE
 note_routes.post("/note/read", async (req, res) => {
@@ -86,7 +102,7 @@ note_routes.post("/note/read", async (req, res) => {
 })
 
 //      UPDATE NOTE
-note_routes.put("/note/update", content_upload.single("content"), authCheck, async (req, res) => {
+note_routes.put("/note/update", content_upload.single("content"), authCheck, super_admin_check, async (req, res) => {
 	try {
 		const data = await req.body
 		const file = await req.file
@@ -100,17 +116,19 @@ note_routes.put("/note/update", content_upload.single("content"), authCheck, asy
 						id: true,
 						filename: true,
 						location: true,
+						note_id: true,
 					},
 				},
 			},
 		})
 
 		if (file) {
-			const removeOldFile = await fs.unlinkSync(
+			//		DELETE NOTE FILE FROM SERVER
+			let removeNoteFileFromServer = await fs.unlinkSync(
 				path.join(__dirname, `../static/public/uploads/content/${findNote.contentUpload.filename}`)
 			)
 
-			const updateNote = await conn.note.update({
+			let updateNote = await conn.note.update({
 				where: {
 					id: parseInt(data.id),
 				},
@@ -118,10 +136,11 @@ note_routes.put("/note/update", content_upload.single("content"), authCheck, asy
 					title: data.title,
 					body: data.body,
 					description: data.description,
-					admin_id: data.admin_id,
+					admin_id: parseInt(data.admin_id),
 					contentUpload: {
 						filename: file.filename,
 						location: `/public/uplodas/content/${file.filename}`,
+						note_id: data.note_id,
 					},
 				},
 			})
@@ -134,7 +153,7 @@ note_routes.put("/note/update", content_upload.single("content"), authCheck, asy
 					title: data.title,
 					body: data.body,
 					description: data.description,
-					admin_id: data.admin_id,
+					admin_id: parseInt(data.admin_id),
 				},
 			})
 		}
@@ -152,27 +171,27 @@ note_routes.put("/note/update", content_upload.single("content"), authCheck, asy
 })
 
 //      DELETE NOTE
-note_routes.delete("/note/delete", content_upload.single("content"), authCheck, async (req, res) => {
+note_routes.delete("/note/delete", content_upload.single("content"), authCheck, super_admin_check, async (req, res) => {
 	try {
-		const data = await req.body
-		const file = await req.file
+		const { id } = await req.body
 		const result = await conn.note.delete({
 			where: {
-				id: parseInt(data.id),
+				id: parseInt(id),
+			},
+			include: {
+				contentUpload: {
+					select: {
+						id: true,
+						filename: true,
+						location: true,
+					},
+				},
 			},
 		})
 
-		if (!result) {
-			res.status(401).json({
-				success: false,
-				msg: "Data not found",
-			})
-			return
-		}
-
-		//      DELETE NOTE FROM SERVER
-		const deleteNoteFromServer = await fs.unlinkSync(
-			path.join(__dirname, `../static/public/uploads/${result.filename}`)
+		//      DELETE FILE FROM SERVER
+		const RemoveFile = await fs.unlinkSync(
+			path.join(__dirname, `../static/public/uploads/content/${result.contentUpload.filename}`)
 		)
 
 		res.status(201).json({

@@ -12,7 +12,7 @@ import note_routes from "./routes/note_routes"
 
 //	RATE LIMIT, THE PROCESS OF LIMITING THE NUMBER OF USER/CLIENT REQUSET ON CERTAIN RESOURCES
 const limiter = rateLimit({
-	windowMs: 15 * 1000, //15 minute
+	windowMs: 15 * 60 * 1000, //15 minutes
 	max: 100,
 	standardHeaders: true,
 	legacyHeaders: false,

@@ -13,11 +13,11 @@ const salt = bcrypt.genSaltSync(10)
 const admin_routes = express.Router()
 
 const limitLogin = rateLimit({
-	windowMs: 15 * 1000, //15 minute
+	windowMs: 15 * 60 * 1000, //15 minutes
 	max: 10,
 	standardHeaders: true,
 	legacyHeaders: false,
-	message: "Too much pressing the screen please wait a while longer !!",
+	message: "Pressing the screen too much, please wait a little longer up to 15 minutes !!",
 })
 
 //          CREATE ADMIN
@@ -101,7 +101,7 @@ admin_routes.post("/admin/login", limitLogin, async (req, res) => {
 })
 
 //      READ ALL ADMIN
-admin_routes.get("/admin/read", authCheck, async (req, res) => {
+admin_routes.get("/admin/read", authCheck, super_admin_check, async (req, res) => {
 	try {
 		const { page = 1, limit = 10 } = req.query
 		let skip = (page - 1) * limit
