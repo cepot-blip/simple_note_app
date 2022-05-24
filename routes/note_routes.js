@@ -78,6 +78,7 @@ note_routes.post("/note/read", async (req, res) => {
 						id: true,
 						filename: true,
 						location: true,
+						note_id: true,
 					},
 				},
 			},
@@ -139,8 +140,7 @@ note_routes.put("/note/update", content_upload.single("content"), authCheck, sup
 					admin_id: parseInt(data.admin_id),
 					contentUpload: {
 						filename: file.filename,
-						location: `/public/uplodas/content/${file.filename}`,
-						note_id: data.note_id,
+						location: `/public/uplodas/content/${findNote.contentUpload.filename}`,
 					},
 				},
 			})

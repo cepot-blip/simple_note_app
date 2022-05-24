@@ -7,7 +7,7 @@ const content_storage = multer.diskStorage({
 		cb(null, Date.now() + "_" + files.originalname)
 	},
 	destination: (req, files, cb) => {
-		cb(null, path.join(__dirname, `../static/public/uploads/content`))
+		cb(null, path.join(__dirname, `../static/public/uploads/content/`))
 	},
 })
 

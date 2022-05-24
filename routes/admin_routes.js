@@ -146,7 +146,7 @@ admin_routes.get("/admin/read", authCheck, super_admin_check, async (req, res) =
 })
 
 //      UPDATE ADMIN
-admin_routes.put("/admin/update", authCheck, async (req, res) => {
+admin_routes.put("/admin/update", authCheck, super_admin_check, async (req, res) => {
 	try {
 		const data = await req.body
 		const result = await conn.admin.update({
