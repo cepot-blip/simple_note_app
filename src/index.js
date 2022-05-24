@@ -7,8 +7,8 @@ const app = express()
 const PORT = process.env.PORT
 import { rateLimit } from "express-rate-limit"
 import helmet from "helmet"
-import admin_routes from "./routes/admin_routes"
-import note_routes from "./routes/note_routes"
+import admin_controller from "./controller/admin_controller"
+import note_controller from "./controller/note_controller"
 
 //	RATE LIMIT, THE PROCESS OF LIMITING THE NUMBER OF USER/CLIENT REQUSET ON CERTAIN RESOURCES
 const limiter = rateLimit({
@@ -51,8 +51,8 @@ app.use(express.urlencoded({ extended: false }))
 app.use(express.static(path.join(__dirname, "static/")))
 
 //		ROUTES
-app.use("/api", admin_routes)
-app.use("/api", note_routes)
+app.use("/api", admin_controller)
+app.use("/api", note_controller)
 
 //		LISTENER
 app.listen(PORT, () => {

@@ -4,13 +4,13 @@ import bcrypt from "bcryptjs"
 import env from "dotenv"
 import cryptoJs from "crypto-js"
 import { rateLimit } from "express-rate-limit"
-import conn from "../prisma/conn"
 import super_admin_check from "../middleware/super_admin_check"
 import { authCheck } from "../middleware/auth"
+import ModelAdmin from "../model/ModelAdmin"
 env.config()
 
 const salt = bcrypt.genSaltSync(10)
-const admin_routes = express.Router()
+const admin_controller = express.Router()
 
 const limitLogin = rateLimit({
 	windowMs: 15 * 60 * 1000, //15 minutes
@@ -21,11 +21,11 @@ const limitLogin = rateLimit({
 })
 
 //          CREATE ADMIN
-admin_routes.post("/admin/create", async (req, res) => {
+admin_controller.post("/admin/create", async (req, res) => {
 	try {
 		const data = await req.body
 
-		const createAdmin = await conn.admin.create({
+		const createAdmin = await ModelAdmin.create({
 			data: {
 				email: data.email,
 				role: data.role,
@@ -46,10 +46,10 @@ admin_routes.post("/admin/create", async (req, res) => {
 })
 
 //          ADMIN LOGIN
-admin_routes.post("/admin/login", limitLogin, async (req, res) => {
+admin_controller.post("/admin/login", limitLogin, async (req, res) => {
 	try {
 		const { email, password } = await req.body
-		const adminCheck = await conn.admin.findUnique({
+		const adminCheck = await ModelAdmin.findUnique({
 			where: {
 				email: email,
 			},
@@ -102,11 +102,11 @@ admin_routes.post("/admin/login", limitLogin, async (req, res) => {
 })
 
 //      READ ALL ADMIN
-admin_routes.get("/admin/read", authCheck, super_admin_check, async (req, res) => {
+admin_controller.get("/admin/read", authCheck, super_admin_check, async (req, res) => {
 	try {
 		const { page = 1, limit = 10 } = req.query
 		let skip = (page - 1) * limit
-		const result = await conn.admin.findMany({
+		const result = await ModelAdmin.findMany({
 			take: parseInt(limit),
 			skip: parseInt(skip),
 			orderBy: { id: "desc" },
@@ -129,7 +129,7 @@ admin_routes.get("/admin/read", authCheck, super_admin_check, async (req, res) =
 			},
 		})
 
-		const cn = await conn.admin.count()
+		const cn = await ModelAdmin.count()
 
 		res.status(200).json({
 			current_page: parseInt(page),
@@ -147,10 +147,10 @@ admin_routes.get("/admin/read", authCheck, super_admin_check, async (req, res) =
 })
 
 //      UPDATE ADMIN
-admin_routes.put("/admin/update", authCheck, super_admin_check, async (req, res) => {
+admin_controller.put("/admin/update", authCheck, super_admin_check, async (req, res) => {
 	try {
 		const data = await req.body
-		const result = await conn.admin.update({
+		const result = await ModelAdmin.update({
 			where: {
 				id: parseInt(data.id),
 			},
@@ -173,10 +173,10 @@ admin_routes.put("/admin/update", authCheck, super_admin_check, async (req, res)
 })
 
 //    DELETE ADMIN
-admin_routes.delete("/admin/delete", authCheck, async (req, res) => {
+admin_controller.delete("/admin/delete", authCheck, async (req, res) => {
 	try {
 		const { id } = await req.body
-		const result = await conn.admin.delete({
+		const result = await ModelAdmin.delete({
 			where: {
 				id: parseInt(id),
 			},
@@ -195,12 +195,12 @@ admin_routes.delete("/admin/delete", authCheck, async (req, res) => {
 })
 
 //      FIND ADMIN
-admin_routes.post("/admin/find", async (req, res) => {
+admin_controller.post("/admin/find", async (req, res) => {
 	try {
 		const { page = 1, limit = 10 } = req.query
 		let skip = (page - 1) * limit
 		const { filter } = await req.body
-		const result = await conn.admin.findFirst({
+		const result = await ModelAdmin.findFirst({
 			where: filter,
 			take: parseInt(page),
 			skip: parseInt(skip),
@@ -224,7 +224,7 @@ admin_routes.post("/admin/find", async (req, res) => {
 			},
 		})
 
-		const cn = await conn.admin.count()
+		const cn = await ModelAdmin.count()
 
 		res.status(200).json({
 			current_page: parseInt(page),
@@ -241,10 +241,10 @@ admin_routes.post("/admin/find", async (req, res) => {
 	}
 })
 
-admin_routes.put("/admin/changed_password", async (req, res) => {
+admin_controller.put("/admin/changed_password", async (req, res) => {
 	try {
 		const { old_password, new_password, email } = await req.body
-		const findUser = await conn.admin.findUnique({
+		const findUser = await ModelAdmin.findUnique({
 			where: {
 				email: email,
 			},
@@ -268,7 +268,7 @@ admin_routes.put("/admin/changed_password", async (req, res) => {
 		}
 
 		const hashNewPassword = await bcrypt.hashSync(new_password, salt)
-		const updatePassword = await conn.admin.update({
+		const updatePassword = await ModelAdmin.update({
 			where: {
 				email: email,
 			},
@@ -290,7 +290,7 @@ admin_routes.put("/admin/changed_password", async (req, res) => {
 })
 
 //		ADMIN VALIDATE
-admin_routes.post("/admin/validate", async (req, res) => {
+admin_controller.post("/admin/validate", async (req, res) => {
 	try {
 		const { token } = await req.body
 		const decryptToken = await cryptoJs.AES.decrypt(token, process.env.API_SECRET).toString(cryptoJs.enc.Utf8)
@@ -317,4 +317,4 @@ admin_routes.post("/admin/validate", async (req, res) => {
 	}
 })
 
-export default admin_routes
+export default admin_controller
