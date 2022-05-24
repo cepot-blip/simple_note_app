@@ -60,7 +60,7 @@ app.listen(PORT, () => {
   
   ==================================
 
-   L I S T E N  T O  P O R T ${PORT}
+   L I S T E N  T O  P O R T ${PORT} :)
 
   ==================================
   
