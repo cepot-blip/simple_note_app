@@ -38,7 +38,7 @@ model Note {
   admin             Admin             @relation(fields: [admin_id], references: [id], onDelete: Cascade)
 
   //  FOREIGN KEY
-  contentUpload     contentUpload[]
+  contentUpload     contentUpload?
 }
 
 

@@ -139,8 +139,10 @@ note_routes.put("/note/update", content_upload.single("content"), authCheck, sup
 					description: data.description,
 					admin_id: parseInt(data.admin_id),
 					contentUpload: {
-						filename: file.filename,
-						location: `/public/uplodas/content/${findNote.contentUpload.filename}`,
+						update : {
+							filename: file.filename,
+							location: `/public/uploads/content/${findNote}`,
+						}
 					},
 				},
 			})
