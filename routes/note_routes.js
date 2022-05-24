@@ -139,10 +139,10 @@ note_routes.put("/note/update", content_upload.single("content"), authCheck, sup
 					description: data.description,
 					admin_id: parseInt(data.admin_id),
 					contentUpload: {
-						update : {
+						update: {
 							filename: file.filename,
 							location: `/public/uploads/content/${findNote}`,
-						}
+						},
 					},
 				},
 			})
@@ -192,7 +192,7 @@ note_routes.delete("/note/delete", content_upload.single("content"), authCheck, 
 		})
 
 		//      DELETE FILE FROM SERVER
-		const RemoveFile = await fs.unlinkSync(
+		const RemoveFileFromServer = await fs.unlinkSync(
 			path.join(__dirname, `../static/public/uploads/content/${result.contentUpload.filename}`)
 		)
 
