@@ -35,7 +35,7 @@ admin_routes.post("/admin/create", async (req, res) => {
 
 		res.status(201).json({
 			success: true,
-			query: createAdmin,
+			query: "Successfully create Admin",
 		})
 	} catch (error) {
 		res.status(500).json({
